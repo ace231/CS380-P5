@@ -44,28 +44,21 @@ public class UdpClient {
             
         header[0] = 69; // 01000101 : Version 0100, HLen 0101
         header[1] = 0;  // TOS
+        
         short length;
         length = (short) (data.length + header.length);
-        
         header[2] = (byte) ((length & 0xFF00) >> 8); // Length
         header[3] = (byte) (length & 0x00FF);
+        
         header[4] = 0;  // Identification 
         header[5] = 0;
         header[6] = 64; // 01000000 : Flags 010, Offset 00000
         header[7] = 0;  // Offset
         header[8] = 50; // TTL : 50 seconds
         header[9] = 17; // Protocol : 17 for UDP
-                        // skip checksum until after header is filled
-                        
-        /*
-        URL getIP = new URL("http://checkip.amazonaws.com");
-        BufferedReader in = new BufferedReader(new InputStreamReader(getIP.openStream(), "UTF-8"));
-        String[] src = in.readLine().split("\\.");
-        for (int i = 0; i < src.length; i++) {
-            int j = Integer.parseInt(src[i]);
-            header[i + 12] = (byte) j;  // source address bytes
-        }
-        */
+        
+        // skip checksum until after header is filled
+        
         byte[] temp = getActualIP();
         for(int i = 0; i < temp.length; i++) {
             header[i + 12] = temp[i];
@@ -118,7 +111,6 @@ public class UdpClient {
     public static byte[] genByteArray(int n) {
         int numBytes = (int)Math.pow(2, n);
         byte[] arr = new byte[numBytes];
-        //System.out.println("size of data " + arr.length);
         
         for(int i = 0; i  < numBytes; i++){
             arr[i] = (byte)(Math.random() * 255);
@@ -126,6 +118,7 @@ public class UdpClient {
         
         return arr;
     }
+    
     
     // Generates UDP packet
     public static byte[] genUDP(int destPort, int dataSize) {
@@ -181,9 +174,9 @@ public class UdpClient {
         short checksum = checksum(checksumPacket);
         udpPacket[6] = (byte) ((checksum >> 8) & 0xFF);
         udpPacket[7] = (byte) (checksum & 0xFF);
-        System.out.println("UDP packet size is " + udpPacket.length);
         return udpPacket;
         } // End of genUDP
+    
     
     public static void main(String[] args) throws Exception {
         try (Socket socket = new Socket("18.221.102.182", 38005)) {
@@ -222,11 +215,11 @@ public class UdpClient {
                 received = System.currentTimeMillis();
                 System.out.println("0x" + response);
                 rtt = received - sent;
-                System.out.println("RTT: " + rtt);
-                totalRTT =+ rtt;
+                System.out.printf("RTT: %dms%n%n", rtt);
+                totalRTT += rtt;
             }
+            System.out.printf("Average RTT: %.2fms", (totalRTT / 12));
             
-            System.out.println("Average RTT: " + (totalRTT / 12));
         } // End of try
     }// End of main
     
